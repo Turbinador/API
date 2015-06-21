@@ -273,6 +273,44 @@ class Turbinador {
 
 		return $response->ReturnCode;
 	}
+	
+	// seguir orientações no manual da API -> http://wiki.turbinador.com/Web-API-CreateAndSendValidationKey.ashx
+	public function CreateAndSendValidationKey($name, $email, $ddd, $number, $type, $sendIfLandline)
+	{
+		$tk = $this->GetAuthorizationCode();
+		if ($tk != "000")
+			return $tk;
+		
+		$data = array(
+		  'token' => $this->authorizationCode,
+		  'name' => utf8_encode($name),
+		  'email' => $email,
+		  'ddd' => $ddd,
+		  'number' => $number,
+		  'type' => $type,
+		  'sendIfLandline' => $sendIfLandline
+		);
+
+		$options = array(
+		  'http' => array(
+			'method'  => 'POST',
+			'content' => json_encode( $data ),
+			'header'=>  "Content-Type: application/json\r\n" .
+						"Accept: application/json\r\n"
+			)
+		);
+
+		$context  = stream_context_create( $options );
+		$result = file_get_contents( 'https://www.uchasoft.com.br/turbinador/api/CreateAndSendValidationKey', false, $context );
+		$response = json_decode( $result );
+
+		if ($response->ReturnCode == "000")
+		{
+			$this->VerificationKey = $response->GeneratedKey;
+		}
+		
+		return $response->ReturnCode;
+	}
 }
 
 ?>
