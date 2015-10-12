@@ -311,6 +311,34 @@ class Turbinador {
 		
 		return $response->ReturnCode;
 	}
+	
+	// seguir orientações no manual da API -> http://wiki.turbinador.com/Web-API-AddSubscriberToAutoResponder.ashx
+	public function AddSubscriberToAutoResponder($email)
+	{
+		$tk = $this->GetAuthorizationCode();
+		if ($tk != "000")
+			return $tk;
+		
+		$data = array(
+		  'token' => $this->authorizationCode,
+		  'email' => $email
+		);
+
+		$options = array(
+		  'http' => array(
+			'method'  => 'POST',
+			'content' => json_encode( $data ),
+			'header'=>  "Content-Type: application/json\r\n" .
+						"Accept: application/json\r\n"
+			)
+		);
+
+		$context  = stream_context_create( $options );
+		$result = file_get_contents( 'https://www.uchasoft.com.br/turbinador/api/AddSubscriberToAutoResponder', false, $context );
+		$response = json_decode( $result );
+
+		return $response->ReturnCode;
+	}
 }
 
 ?>
